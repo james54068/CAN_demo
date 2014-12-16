@@ -293,6 +293,7 @@ int main(void)
     LCD_DisplayStringLine(LINE(2), (uint8_t*)lcd_text_buff);
 
     DrawNeedle(120,160,80,100,-100,GyX);
+    Delay_1us(100000);
     LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_WHITE);
     DrawNeedle(120,160,80,100,-100,GyX);
 
@@ -343,7 +344,7 @@ int main(void)
    //  LCD_DrawFullRect(0,0,240,320);
 
 
-   //  Delay_1us(10000);
+     
 
   }
   
