@@ -28,7 +28,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "drawing.h"
 float Buffer[6];
 
 /* Private macro -------------------------------------------------------------*/
@@ -129,23 +129,68 @@ static inline void Delay_1us(uint32_t nCnt_1us)
     for (nCnt = 13; nCnt != 0; nCnt--);
 }
 
-void DrawThickCircle(uint32_t x,uint32_t y,uint32_t radius, uint32_t thickness){
-
-
-    LCD_SetTextColor(LCD_COLOR_BLACK);
-    LCD_DrawFullCircle(x, y, radius);
-    LCD_SetColors(LCD_COLOR_WHITE-1,LCD_COLOR_WHITE);
-    LCD_DrawFullCircle(x, y, radius-thickness);
-    LCD_DrawUniLine(x,y,x+radius,y+radius);
-
-
-}
-
-void DrawNeedle(uint16_t x,uint16_t y,uint16_t radius,float max,float min,float variable)
+void GPIO_Configuration(void)
 {
-  
-  LCD_DrawUniLine(x,y,x+radius,y+radius);
+    /* GPIOA clock enable */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /*-------------------------- GPIO Configuration for Push Button ----------------------------*/
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_1;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG , ENABLE); //LED3/4 GPIO Port
+
+    /* Configure the GPIO_LED pin */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;  // LED is connected to PG13/PG14
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOG, &GPIO_InitStructure);
+
+    /* Connect USART pins to AF */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);   // USART1_TX
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
+
 }
+
+void USART1_Configuration(void)
+{
+    /* USART1 clock enable */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    USART_InitTypeDef USART_InitStructure;
+
+    /* USARTx configuration ------------------------------------------------------*/
+    /* USARTx configured as follow:
+     *  - BaudRate = 115200 baud
+     *  - Word Length = 8 Bits
+     *  - One Stop Bit
+     *  - No parity
+     *  - Hardware flow control disabled (RTS and CTS signals)
+     *  - Receive and transmit enabled
+     */
+    USART_InitStructure.USART_BaudRate = 921600;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(USART1, &USART_InitStructure);
+    USART_Cmd(USART1, ENABLE);
+}
+
 
 int main(void)
 {
@@ -166,52 +211,43 @@ int main(void)
   */      
 
   /* LCD initialization */
-  LCD_Init();
-  
+  LCD_Init(); 
   /* LCD Layer initialization */
   LCD_LayerInit();
-    
-  LCD_SetLayer(LCD_FOREGROUND_LAYER);
+  /* configure the color Keying */
   LCD_SetColorKeying(0xFFFFFF);
-
-  // /* Need to reload */
-  LTDC_ReloadConfig(LTDC_IMReload);
-
-  // /* Enable the LTDC */
+  /* Enable the LTDC */
   LTDC_Cmd(ENABLE);
   
-  /* Set LCD foreground layer */
-  
-  /* MEMS Initialization */
-  Demo_GyroConfig();
-
-
   /* Clear the LCD */ 
   LCD_Clear(LCD_COLOR_WHITE);
   LCD_SetFont(&Font12x12);
 
+
   LCD_SetLayer(LCD_FOREGROUND_LAYER);
-  LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_BLACK);
-
-  LCD_DisplayStringLine(LINE(1), (uint8_t*)" LCD text print example ");
-  LCD_DisplayStringLine(LINE(2), (uint8_t*)" Ming6842 @ github");
-
+  LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
+  //LCD_DrawFullRect(0,0,240,320);
+  Meter(120,160,100,10,-10);
+  
 
   //LCD_SetColors(ASSEMBLE_RGB(colorR, colorG, colorB),LCD_COLOR_BLACK);
   //LCD_DrawFullRect(0,0,240,320);
-  LCD_SetLayer(LCD_BACKGROUND_LAYER);
-  LCD_SetColors(LCD_COLOR_BLUE,LCD_COLOR_BLACK);
-  LCD_DrawFullRect(0,0,240,320);
+  // LCD_SetLayer(LCD_BACKGROUND_LAYER);
+  // LCD_SetColors(LCD_COLOR_BLUE,LCD_COLOR_BLACK);
+  // LCD_DrawFullRect(0,0,240,320);
 
-  LCD_Clear(LCD_COLOR_WHITE);
+  // LCD_Clear(LCD_COLOR_WHITE);
 
 
-
-  LCD_SetLayer(LCD_BACKGROUND_LAYER);
-  LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
-  DrawThickCircle(120,160,100,5);
 
   // LCD_SetLayer(LCD_BACKGROUND_LAYER);
+  // LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
+  // DrawThickCircle(120,160,100,5);
+
+  // LCD_SetLayer(LCD_BACKGROUND_LAYER);
+
+  /* MEMS Initialization */
+  Demo_GyroConfig();
 
   #define CALIBRATE_COUNT 200
   for (i=0;i<CALIBRATE_COUNT ;i++){
@@ -227,14 +263,21 @@ int main(void)
   Y_offset = Y_offset/ (float)CALIBRATE_COUNT;
   Z_offset = Z_offset/ (float)CALIBRATE_COUNT;
 
+  GPIO_Configuration();
+  USART1_Configuration();
   CAN1_Config();
   CAN1_NVIC_Config();
 
   while (1)
   {
     CAN1_Transmit();
+    GPIO_ToggleBits(LED4);
+
+
+
 
     LCD_SetLayer(LCD_FOREGROUND_LAYER);
+    LCD_SetTransparency(122);
     LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
     Demo_GyroReadAngRate (Buffer);
 
@@ -249,58 +292,58 @@ int main(void)
     sprintf(lcd_text_buff," GyY :%f          ",(GyY *1.0f));
     LCD_DisplayStringLine(LINE(2), (uint8_t*)lcd_text_buff);
 
-    //DrawNeedle(120,160,50);
-   
+    DrawNeedle(120,160,80,100,-100,GyX);
+    LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_WHITE);
+    DrawNeedle(120,160,80,100,-100,GyX);
 
-  //LCD_SetLayer(LCD_BACKGROUND_LAYER);
 
-/*    if(colorR_dir){
+   //  LCD_SetLayer(LCD_BACKGROUND_LAYER);
 
-          colorR += 1;
+   // if(colorR_dir){
 
-      if(colorR > 250) colorR_dir=0;
+   //        colorR += 1;
+
+   //    if(colorR > 250) colorR_dir=0;
       
-    }else{
+   //  }else{
 
-      colorR -= 1;
+   //    colorR -= 1;
 
-      if(colorR<20) colorR_dir=1;
-    }
+   //    if(colorR<20) colorR_dir=1;
+   //  }
 
-    if(colorG_dir){
+   //  if(colorG_dir){
 
-          colorG += 2;
+   //        colorG += 2;
 
-      if(colorG > 250) colorG_dir=0;
+   //    if(colorG > 250) colorG_dir=0;
       
-    }else{
+   //  }else{
 
-      colorG -= 2;
+   //    colorG -= 2;
 
-      if(colorG<25) colorG_dir=1;
-    }
+   //    if(colorG<25) colorG_dir=1;
+   //  }
 
-    if(colorB_dir){
+   //  if(colorB_dir){
 
-          colorB += 3;
+   //        colorB += 3;
 
-      if(colorB > 250) colorB_dir=0;
+   //    if(colorB > 250) colorB_dir=0;
       
-    }else{
+   //  }else{
 
-      colorB -= 3;
+   //    colorB -= 3;
 
-      if(colorB<25) colorB_dir=1;
-    }*/
-
-
-    //LCD_SetColors(ASSEMBLE_RGB(colorR, colorG, colorB),LCD_COLOR_BLACK);
-    //LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_WHITE);
-    //LCD_DrawFullRect(0,0,0,0);
+   //    if(colorB<25) colorB_dir=1;
+   //  }
 
 
+   //  LCD_SetColors(ASSEMBLE_RGB(colorR, colorG, colorB),LCD_COLOR_BLACK);
+   //  LCD_DrawFullRect(0,0,240,320);
 
-    //Delay_1us(10000);
+
+   //  Delay_1us(10000);
 
   }
   

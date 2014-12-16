@@ -1,5 +1,6 @@
 /* CAN bus driver */
 #include "can.h"
+#include "main.h"
 void CAN1_Config(void)
 {
 	CAN_InitTypeDef CAN_InitStructure;
@@ -50,7 +51,7 @@ void CAN1_Config(void)
 	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
 	CAN_FilterInit(&CAN_FilterInitStructure);
 	/* Enable FIFO 0 message pending Interrupt */
-	CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
+	CAN_ITConfig(CAN1, CAN_IT_FF0, ENABLE);
 }
 
 void CAN1_Transmit(void){
@@ -84,11 +85,14 @@ void CAN1_NVIC_Config(void)
 }
 
 CanRxMsg RxMessage;
+char can_buff[100];
 void CAN1_RX0_IRQHandler(void)
 {
 	CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	if ((RxMessage.StdId == 0x321)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 8))
+	if ((RxMessage.StdId == 0x123)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 8))
 	{
-		//LED_TOGGLE(LED3);
+		// sprintf(can_buff," RxMessage.Data[0] :%d ",RxMessage.Data[0]);
+		// LCD_DisplayStringLine(LINE(1), (uint8_t*)can_buff);
+		GPIO_ToggleBits(LED3);
 	}
 }
