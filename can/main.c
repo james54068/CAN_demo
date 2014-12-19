@@ -133,6 +133,7 @@ void GPIO_Configuration(void)
 {
     /* GPIOA clock enable */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
     GPIO_InitTypeDef GPIO_InitStructure;
 
     /*-------------------------- GPIO Configuration for Push Button ----------------------------*/
@@ -143,12 +144,23 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+    // GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+    // GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    // GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    // GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    // GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    // GPIO_Init(GPIOD, &GPIO_InitStructure);
+
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+      /* Connect USART pins to AF */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);   // USART1_TX
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG , ENABLE); //LED3/4 GPIO Port
 
@@ -159,10 +171,6 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOG, &GPIO_InitStructure);
-
-    /* Connect USART pins to AF */
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);   // USART1_TX
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
 
 }
 
@@ -203,6 +211,11 @@ int main(void)
   uint32_t i=0;
 
 
+  GPIO_Configuration();
+  USART1_Configuration();
+  CANx_Config();
+  CANx_NVIC_Config();
+
   /*!< At this stage the microcontroller clock setting is already configured, 
   this is done through SystemInit() function which is called from startup
   file (startup_stm32f429_439xx.s) before to branch to application main.
@@ -211,24 +224,25 @@ int main(void)
   */      
 
   /* LCD initialization */
-  LCD_Init(); 
-  /* LCD Layer initialization */
-  LCD_LayerInit();
-  /* configure the color Keying */
-  LCD_SetColorKeying(0xFFFFFF);
-  /* Enable the LTDC */
-  LTDC_Cmd(ENABLE);
+  // LCD_Init(); 
+  // /* LCD Layer initialization */
+  // LCD_LayerInit();
+  // /* configure the color Keying */
+  // LCD_SetColorKeying(0xFFFFFF);
+  // /* Enable the LTDC */
+  // LTDC_Cmd(ENABLE);
   
-  /* Clear the LCD */ 
-  LCD_Clear(LCD_COLOR_WHITE);
-  LCD_SetFont(&Font12x12);
+  // /* Clear the LCD */ 
+  // LCD_Clear(LCD_COLOR_WHITE);
+  // LCD_SetFont(&Font12x12);
 
 
-  LCD_SetLayer(LCD_FOREGROUND_LAYER);
-  LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
-  //LCD_DrawFullRect(0,0,240,320);
-  Meter(120,160,100,10,-10);
+  // LCD_SetLayer(LCD_FOREGROUND_LAYER);
+  // LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
+  // //LCD_DrawFullRect(0,0,240,320);
   
+  // Meter(120,160,100,10,-10);
+
 
   //LCD_SetColors(ASSEMBLE_RGB(colorR, colorG, colorB),LCD_COLOR_BLACK);
   //LCD_DrawFullRect(0,0,240,320);
@@ -247,55 +261,51 @@ int main(void)
   // LCD_SetLayer(LCD_BACKGROUND_LAYER);
 
   /* MEMS Initialization */
-  Demo_GyroConfig();
+  // Demo_GyroConfig();
 
-  #define CALIBRATE_COUNT 200
-  for (i=0;i<CALIBRATE_COUNT ;i++){
+  // #define CALIBRATE_COUNT 200
+  // for (i=0;i<CALIBRATE_COUNT ;i++){
 
 
-    Demo_GyroReadAngRate (Buffer);
-    X_offset+= Buffer[0];
-    Y_offset+= Buffer[1];
-    Z_offset+= Buffer[2];
+  //   Demo_GyroReadAngRate (Buffer);
+  //   X_offset+= Buffer[0];
+  //   Y_offset+= Buffer[1];
+  //   Z_offset+= Buffer[2];
 
-  }
-  X_offset = X_offset/ (float)CALIBRATE_COUNT;
-  Y_offset = Y_offset/ (float)CALIBRATE_COUNT;
-  Z_offset = Z_offset/ (float)CALIBRATE_COUNT;
+  // }
+  // X_offset = X_offset/ (float)CALIBRATE_COUNT;
+  // Y_offset = Y_offset/ (float)CALIBRATE_COUNT;
+  // Z_offset = Z_offset/ (float)CALIBRATE_COUNT;
 
-  GPIO_Configuration();
-  USART1_Configuration();
-  CAN1_Config();
-  CAN1_NVIC_Config();
-
+  
+  // CANx_Transmit();
   while (1)
   {
-    CAN1_Transmit();
+    CANx_Transmit();
     GPIO_ToggleBits(LED4);
+    // GPIO_ToggleBits(GPIOD,GPIO_Pin_0);
+    // GPIO_ToggleBits(GPIOD,GPIO_Pin_1);
 
+    // LCD_SetLayer(LCD_FOREGROUND_LAYER);
+    // //LCD_SetTransparency(122);
+    // LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
+    // Demo_GyroReadAngRate (Buffer);
 
+    // /* MEMS Test area */
+    // #define LP_ALPHA 0.3f
+    // GyX = GyX*(1.0f - LP_ALPHA) + (Buffer[0] - X_offset)*LP_ALPHA;
+    // GyY = GyY*(1.0f - LP_ALPHA) + (Buffer[1] - Y_offset)*LP_ALPHA;
+    // GyZ = GyZ*(1.0f - LP_ALPHA) + (Buffer[2] - Z_offset)*LP_ALPHA;
 
+    // sprintf(lcd_text_buff," GyX :%f         ",(GyX *1.0f));
+    // LCD_DisplayStringLine(LINE(1), (uint8_t*)lcd_text_buff);
+    // sprintf(lcd_text_buff," GyY :%f          ",(GyY *1.0f));
+    // LCD_DisplayStringLine(LINE(2), (uint8_t*)lcd_text_buff);
 
-    LCD_SetLayer(LCD_FOREGROUND_LAYER);
-    LCD_SetTransparency(122);
-    LCD_SetColors(LCD_COLOR_BLACK,LCD_COLOR_WHITE);
-    Demo_GyroReadAngRate (Buffer);
-
-    /* MEMS Test area */
-    #define LP_ALPHA 0.3f
-    GyX = GyX*(1.0f - LP_ALPHA) + (Buffer[0] - X_offset)*LP_ALPHA;
-    GyY = GyY*(1.0f - LP_ALPHA) + (Buffer[1] - Y_offset)*LP_ALPHA;
-    GyZ = GyZ*(1.0f - LP_ALPHA) + (Buffer[2] - Z_offset)*LP_ALPHA;
-
-    sprintf(lcd_text_buff," GyX :%f         ",(GyX *1.0f));
-    LCD_DisplayStringLine(LINE(1), (uint8_t*)lcd_text_buff);
-    sprintf(lcd_text_buff," GyY :%f          ",(GyY *1.0f));
-    LCD_DisplayStringLine(LINE(2), (uint8_t*)lcd_text_buff);
-
-    DrawNeedle(120,160,80,100,-100,GyX);
-    Delay_1us(100000);
-    LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_WHITE);
-    DrawNeedle(120,160,80,100,-100,GyX);
+    // DrawNeedle(120,160,75,10,-10,GyX);
+    // Delay_1us(100000);
+    // LCD_SetColors(LCD_COLOR_WHITE,LCD_COLOR_WHITE);
+    // DrawNeedle(120,160,75,10,-10,GyX);
 
 
    //  LCD_SetLayer(LCD_BACKGROUND_LAYER);

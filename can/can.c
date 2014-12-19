@@ -1,7 +1,7 @@
 /* CAN bus driver */
 #include "can.h"
 #include "main.h"
-void CAN1_Config(void)
+void CANx_Config(void)
 {
 	CAN_InitTypeDef CAN_InitStructure;
 	CAN_FilterInitTypeDef CAN_FilterInitStructure;
@@ -17,13 +17,13 @@ void CAN1_Config(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(CAN_GPIO_PORT, &GPIO_InitStructure);
 	/* CAN configuration ********************************************************/
 	/* Enable CAN clock */
 	RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
 	/* CAN register init */
-	CAN_DeInit(CAN1);
+	CAN_DeInit(CANx);
 	/* CAN cell init */
 	CAN_InitStructure.CAN_TTCM = DISABLE;
 	CAN_InitStructure.CAN_ABOM = DISABLE;
@@ -37,7 +37,7 @@ void CAN1_Config(void)
 	CAN_InitStructure.CAN_BS1 = CAN_BS1_6tq;
 	CAN_InitStructure.CAN_BS2 = CAN_BS2_8tq;
 	CAN_InitStructure.CAN_Prescaler = 1000;
-	CAN_Init(CAN1, &CAN_InitStructure);
+	CAN_Init(CANx, &CAN_InitStructure);
 	/* CAN filter init */
 	CAN_FilterInitStructure.CAN_FilterNumber = 0;
 	/* USE_CAN1 */
@@ -51,10 +51,10 @@ void CAN1_Config(void)
 	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
 	CAN_FilterInit(&CAN_FilterInitStructure);
 	/* Enable FIFO 0 message pending Interrupt */
-	CAN_ITConfig(CAN1, CAN_IT_FF0, ENABLE);
+	CAN_ITConfig(CANx, CAN_IT_FF0, ENABLE);
 }
 
-void CAN1_Transmit(void){
+void CANx_Transmit(void){
 	CanTxMsg TxMessage;
 	/* Transmit Structure preparation */
 	TxMessage.StdId = 0x321;
@@ -70,13 +70,13 @@ void CAN1_Transmit(void){
 	TxMessage.Data[5] = 64;
 	TxMessage.Data[6] = 64;
 	TxMessage.Data[7] = 64;
-	CAN_Transmit(CAN1, &TxMessage);
+	CAN_Transmit(CANx, &TxMessage);
 }
 
-void CAN1_NVIC_Config(void)
+void CANx_NVIC_Config(void)
 {
 	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = CAN1_RX0_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = CAN2_RX0_IRQn;
 	/* USE_CAN1 */
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
@@ -88,11 +88,24 @@ CanRxMsg RxMessage;
 char can_buff[100];
 void CAN1_RX0_IRQHandler(void)
 {
-	CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	if ((RxMessage.StdId == 0x123)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 8))
-	{
-		// sprintf(can_buff," RxMessage.Data[0] :%d ",RxMessage.Data[0]);
-		// LCD_DisplayStringLine(LINE(1), (uint8_t*)can_buff);
-		GPIO_ToggleBits(LED3);
-	}
+	CAN_Receive(CANx, CAN_FIFO0, &RxMessage);
+	//GPIO_ToggleBits(LED3);
+	// if ((RxMessage.StdId == 0x123)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 8))
+	// {
+	// 	// sprintf(can_buff," RxMessage.Data[0] :%d ",RxMessage.Data[0]);
+	// 	// LCD_DisplayStringLine(LINE(1), (uint8_t*)can_buff);
+	// 	GPIO_ToggleBits(LED3);
+	// }
+}
+
+void CAN2_RX0_IRQHandler(void)
+{
+	CAN_Receive(CANx, CAN_FIFO0, &RxMessage);
+	//GPIO_ToggleBits(LED3);
+	// if ((RxMessage.StdId == 0x123)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 8))
+	// {
+	// 	// sprintf(can_buff," RxMessage.Data[0] :%d ",RxMessage.Data[0]);
+	// 	// LCD_DisplayStringLine(LINE(1), (uint8_t*)can_buff);
+	// 	GPIO_ToggleBits(LED3);
+	// }
 }
