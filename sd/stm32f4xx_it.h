@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    Touch_Panel/main.h 
+  * @file    Touch_Panel/stm32f4xx_it.h 
   * @author  MCD Application Team
   * @version V1.0.1
   * @date    11-November-2013
-  * @brief   Header for main.c module
+  * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
   * @attention
   *
@@ -26,36 +26,33 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __STM32F4xx_IT_H
+#define __STM32F4xx_IT_H
+
+#ifdef __cplusplus
+ extern "C" {
+#endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
-#include <stdio.h>
-#include "stm32f429i_discovery.h"
-#include "stm32f429i_discovery_lcd.h"
-#include "stm32f429i_discovery_ioe.h"
-#include "stm32f429i_discovery_l3gd20.h"
-#include "can.h"
-
-/* Private define ------------------------------------------------------------*/
-#define LED_TOGGLE(led_name) GPIO_ToggleBits(led_name)
-#define LED_ON(led_name) GPIO_ResetBits(led_name)
-#define LED_OFF(led_name) GPIO_SetBits(led_name)
-#define LED1 GPIOE, GPIO_Pin_8
-#define LED2 GPIOE, GPIO_Pin_10
-#define LED3 GPIOG, GPIO_Pin_13
-#define LED4 GPIOG, GPIO_Pin_14
-#define TOGGLE_DEBUG GPIOC, GPIO_Pin_9
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-/* Exported macro ------------------------------------------------------------*/ 
+/* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void GPIO_Configuration(void);
-void USART1_Configuration(void);
-static inline void Delay_1us(uint32_t nCnt_1us);
 
+void NMI_Handler(void);
+void HardFault_Handler(void);
+void MemManage_Handler(void);
+void BusFault_Handler(void);
+void UsageFault_Handler(void);
+void SVC_Handler(void);
+void DebugMon_Handler(void);
+void PendSV_Handler(void);
+void SysTick_Handler(void);
 
-#endif /* __MAIN_H */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __STM32F4xx_IT_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

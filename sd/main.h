@@ -36,7 +36,7 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ioe.h"
 #include "stm32f429i_discovery_l3gd20.h"
-#include "can.h"
+
 
 /* Private define ------------------------------------------------------------*/
 #define LED_TOGGLE(led_name) GPIO_ToggleBits(led_name)
@@ -51,10 +51,6 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/ 
 /* Exported functions ------------------------------------------------------- */
-void GPIO_Configuration(void);
-void USART1_Configuration(void);
-static inline void Delay_1us(uint32_t nCnt_1us);
-
 
 #endif /* __MAIN_H */
 
