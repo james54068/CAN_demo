@@ -13,7 +13,7 @@ void SD_SPI_SpeedLow(void)
 }
 void SD_SPI_SpeedHigh(void)
 {
- 	SPIx_SetSpeed(SPI_BaudRatePrescaler_8);	
+ 	SPIx_SetSpeed(SPI_BaudRatePrescaler_32);	
 }
 
 void SD_SPI_Init(void)
@@ -154,7 +154,7 @@ u32 SD_GetSectorCount(void)
     {	
 		csize = csd[9] + ((u16)csd[8] << 8) + 1;
 		Capacity = (u32)csize << 10; 		   
-    }else//V1.XXªº¥d
+    }else
     {	
 		n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
 		csize = (csd[8] >> 6) + ((u16)csd[7] << 2) + ((u16)(csd[6] & 3) << 10) + 1;

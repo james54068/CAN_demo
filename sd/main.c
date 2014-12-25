@@ -150,19 +150,18 @@ int main(void)
     Delay_1us(1000000);
   }
 
-  printf("SD card ready!");
-
-  sd_size=SD_GetSectorCount();
-  sd_size=(sd_size*512.0f)/1024.0f/1024.0f/1024.0f;
-
-  printf("SD card size %f GB",sd_size);
+  printf("SD card ready!\r\n");
+  
+  sd_size = SD_GetSectorCount();
+  sd_size = (sd_size*512.0f)/1024.0f/1024.0f/1024.0f;
+  
+  printf("SD card size %f GB\r\n",sd_size);
  
 
   while (1)
   {
     CANx_Transmit();
     GPIO_ToggleBits(LED4);
-    //printf("12345\r\n");
 
   }
   
