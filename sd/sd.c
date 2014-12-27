@@ -3,10 +3,6 @@
 
 u8  SD_Type=0; 
 
-u8 SD_SPI_ReadWriteByte(u8 data)
-{
-	return SPIx_ReadWriteByte(data);
-}
 void SD_SPI_SpeedLow(void)
 {
  	SPIx_SetSpeed(SPI_BaudRatePrescaler_256);	
@@ -19,7 +15,8 @@ void SD_SPI_SpeedHigh(void)
 void SD_SPI_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
-	RCC_AHB1PeriphClockCmd(SD_CS_CLK, ENABLE);	 
+	RCC_AHB1PeriphClockCmd(SD_CS_CLK, ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE); 
 
 	GPIO_InitStruct.GPIO_Pin = SD_CS_PIN;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -36,45 +33,51 @@ void SD_SPI_Init(void)
 void SD_DisSelect(void)
 {
 	Set_SD_CS;
-	SD_SPI_ReadWriteByte(0xff);
+	//SPIx_ReadWriteByte(0xff);
 }
 u8 SD_Select(void)
 {
 	Clr_SD_CS;
+	/*wait sd card to be ready*/
 	if(SD_WaitReady()==0)return 0;
-	//
+	/*wait too long then skip it*/
 	SD_DisSelect();
 	return 1;
 }
+
 u8 SD_WaitReady(void)
 {
 	u32 t=0;
 	do
 	{
-		if(SD_SPI_ReadWriteByte(0XFF)==0XFF)return 0;
-		t++;		  	
-	}while(t<0XFFFFFF); 
+		/*Get 0xFF means redy to accept command(Timming Diagrams)*/
+		if(SPIx_ReadWriteByte(0XFF)==0XFF)return 0;	
+
+	}while(t<0XFFFFFF && t++); 
 	return 1;
 }
 
 u8 SD_GetResponse(u8 Response)
 {
-	u16 Count=0xFFF;  						  
-	while ((SD_SPI_ReadWriteByte(0XFF)!=Response)&&Count)Count--; 	  
+	u16 Count=0xFF;  
+	/*read response start with 0xFF*/						  
+	while ((SPIx_ReadWriteByte(0XFF)!=Response)&&Count)Count--; 	  
 	if (Count==0)return MSD_RESPONSE_FAILURE;  
 	else return MSD_RESPONSE_NO_ERROR;
 }
 
 u8 SD_RecvData(u8*buf,u16 len)
-{			  	  
+{	
+	/*check read response(first byte)*/		  	  
 	if(SD_GetResponse(0xFE))return 1;
     while(len--)
     {
         *buf=SPIx_ReadWriteByte(0xFF);
         buf++;
     }
-    SD_SPI_ReadWriteByte(0xFF);
-    SD_SPI_ReadWriteByte(0xFF);									  					    
+    /*CRC Byte*/
+    SPIx_ReadWriteByte(0xFF);
+    SPIx_ReadWriteByte(0xFF);									  					    
     return 0;
 }
 	
@@ -82,37 +85,40 @@ u8 SD_SendBlock(u8*buf,u8 cmd)
 {	
 	u16 t;		  	  
 	if(SD_WaitReady())return 1;
-	SD_SPI_ReadWriteByte(cmd);
+	SPIx_ReadWriteByte(cmd);
 	if(cmd!=0XFD)
 	{
 		for(t=0;t<512;t++)SPIx_ReadWriteByte(buf[t]);
-	    SD_SPI_ReadWriteByte(0xFF);
-	    SD_SPI_ReadWriteByte(0xFF);
-		t=SD_SPI_ReadWriteByte(0xFF);
+	    SPIx_ReadWriteByte(0xFF);
+	    SPIx_ReadWriteByte(0xFF);
+		t=SPIx_ReadWriteByte(0xFF);
 		if((t&0x1F)!=0x05)return 2;									  					    
 	}						 									  					    
     return 0;
 }
-													  
+												  
 u8 SD_SendCmd(u8 cmd, u32 arg, u8 crc)
-{
+{ 
     u8 r1;	
 	u8 Retry=0; 
-	SD_DisSelect();
+	//SD_DisSelect();
 	if(SD_Select())return 0XFF;
-    SD_SPI_ReadWriteByte(cmd | 0x40);
-    SD_SPI_ReadWriteByte(arg >> 24);
-    SD_SPI_ReadWriteByte(arg >> 16);
-    SD_SPI_ReadWriteByte(arg >> 8);
-    SD_SPI_ReadWriteByte(arg);	  
-    SD_SPI_ReadWriteByte(crc); 
-	if(cmd==CMD12)SD_SPI_ReadWriteByte(0xff);
+	/*( cmd | 0x40 ) because of command format*/
+    SPIx_ReadWriteByte(cmd | 0x40);
+    SPIx_ReadWriteByte(arg >> 24);
+    SPIx_ReadWriteByte(arg >> 16);
+    SPIx_ReadWriteByte(arg >> 8);
+    SPIx_ReadWriteByte(arg);	  
+    SPIx_ReadWriteByte(crc); 
+    /*R1b response */
+	if(cmd==CMD12)SPIx_ReadWriteByte(0xFF);
 	Retry=0X1F;
+	/*Wait for response*/
 	do
 	{
-		r1=SD_SPI_ReadWriteByte(0xFF);
+		r1 = SPIx_ReadWriteByte(0xFF);
+	/*check r1 response is correct 0|~*/
 	}while((r1&0X80) && Retry--);	 
-	//ªð¦^ª¬ºA­È
     return r1;
 }		    																			  
 													   
@@ -131,11 +137,16 @@ u8 SD_GetCID(u8 *cid_data)
 }																				  
 														   
 u8 SD_GetCSD(u8 *csd_data)
-{
+{ 	
+	u8 retry=0xFF;
     u8 r1;	 
-    r1=SD_SendCmd(CMD9,0,0x01);
+    do
+    {
+    	r1=SD_SendCmd(CMD9,0,0x01);
+    }while(r1 && retry--);
     if(r1==0)
 	{
+		/*CSD is 16 Byte*/
     	r1=SD_RecvData(csd_data, 16);
     }
 	SD_DisSelect();
@@ -145,20 +156,25 @@ u8 SD_GetCSD(u8 *csd_data)
 													  
 u32 SD_GetSectorCount(void)
 {
-    u8 csd[16];
+    u8 	csd[16];
     u32 Capacity;  
-    u8 n;
-	u16 csize;  					    
-    if(SD_GetCSD(csd)!=0) return 0;	    
+    u8 	n;
+	u32 csize; 
+	u8  bl_len;
+	u8  mult;					    
+    if(SD_GetCSD(csd)!=0) return 0;	
+    /*check CSD version(2.0HC)*/    
     if((csd[0]&0xC0)==0x40)	 
     {	
-		csize = csd[9] + ((u16)csd[8] << 8) + 1;
-		Capacity = (u32)csize << 10; 		   
-    }else
+  		csize = (u32)csd[9] + (((u32)csd[8])<<8) + (((u32)csd[7])<<16)+(((u32)(csd[6]&0x0F))<<24)+1;
+		Capacity= csize << 10 ;  
+		 		   
+    }else/*check CSD version(1.0)*/  
     {	
-		n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
-		csize = (csd[8] >> 6) + ((u16)csd[7] << 2) + ((u16)(csd[6] & 3) << 10) + 1;
-		Capacity= (u32)csize << (n - 9);  
+    	csize = (u16)csd[9] + ((u16)(csd[8]&0x0F) << 8) + 1;
+		bl_len = csd[5]&0x0F; 
+		mult = (csd[10]>>1)&0x07;
+		Capacity = (u32)csize << (bl_len+mult+2);
     }
     return Capacity;
 }
@@ -191,37 +207,49 @@ u8 SD_Initialize(void)
     u8 buf[4];  
 	u16 i;
 
-	SD_SPI_Init();		
+	SPIx_Init();	
  	SD_SPI_SpeedLow();		  
-	for(i=0;i<10;i++)SD_SPI_ReadWriteByte(0XFF);
+	// for(i=0;i<10;i++)SPIx_ReadWriteByte(0XFF);
 	retry=20;
 	do
 	{
+		/*Resets the SD Card*/
 		r1=SD_SendCmd(CMD0,0,0x95);
+	/*send until response is right*/
 	}while((r1!=0X01) && retry--);
  	SD_Type=0;
 	if(r1==0X01)
 	{
+		/*check voltage(get R1)*/
 		if(SD_SendCmd(CMD8,0x1AA,0x87)==1)
-		{
-			for(i=0;i<4;i++)buf[i]=SD_SPI_ReadWriteByte(0XFF);	
+		{   
+			for(i=0;i<4;i++)buf[i]=SPIx_ReadWriteByte(0XFF);
+			/*check VHS & Pattern Echo back*/	
 			if(buf[2]==0X01&&buf[3]==0XAA)
-			{
+			{/*support 2.7~3.6V*/
 				retry=0XFFFE;
 				do
 				{
+					/*indicate next command following command is spi only */
 					SD_SendCmd(CMD55,0,0X01);	
+					/*HCS = 1 -> support SDHC(high capacity) */
 					r1=SD_SendCmd(CMD41,0x40000000,0X01);
 				}while(r1&&retry--);
 				if(retry&&SD_SendCmd(CMD58,0,0X01)==0)
 				{
-					for(i=0;i<4;i++)buf[i]=SD_SPI_ReadWriteByte(0XFF);
+					/*read OCR register */
+					for(i=0;i<4;i++)buf[i]=SPIx_ReadWriteByte(0XFF);
 					if(buf[0]&0x40)SD_Type=SD_TYPE_V2HC;    
 					else SD_Type=SD_TYPE_V2;   
 				}
 			}
+			else
+			{
+				printf("Check support voltage!\r\n");
+			}
 		}else
 		{
+			/*MMC will get lots of error V1 will idle or not idle*/
 			SD_SendCmd(CMD55,0,0X01);	
 			r1=SD_SendCmd(CMD41,0,0X01);
 			if(r1<=1)
@@ -242,6 +270,7 @@ u8 SD_Initialize(void)
 					r1=SD_SendCmd(CMD1,0,0X01);
 				}while(r1&&retry--);  
 			}
+			/*no response || can not set 512 Byte Block*/
 			if(retry==0||SD_SendCmd(CMD16,512,0X01)!=0)SD_Type=SD_TYPE_ERR;
 		}
 	}

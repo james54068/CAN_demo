@@ -32,6 +32,8 @@
 #include "drawing.h"
 #include "init_mcu.h"
 #include "can.h"
+#include "sd.h"
+
 
 float Buffer[6];
 
@@ -152,9 +154,8 @@ int main(void)
 
   printf("SD card ready!\r\n");
   
-  sd_size = SD_GetSectorCount();
-  sd_size = (sd_size*512.0f)/1024.0f/1024.0f/1024.0f;
-  
+  sd_size = (SD_GetSectorCount()*512.0f)/1024.0f/1024.0f/1024.0f;;
+   
   printf("SD card size %f GB\r\n",sd_size);
  
 
