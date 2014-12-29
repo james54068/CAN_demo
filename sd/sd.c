@@ -60,7 +60,7 @@ u8 SD_WaitReady(void)
 u8 SD_GetResponse(u8 Response)
 {
 	u16 Count=0xFF;  
-	/*read response start with 0xFF*/						  
+	/*read data response start byte with 0xFF*/						  
 	while ((SPIx_ReadWriteByte(0XFF)!=Response)&&Count)Count--; 	  
 	if (Count==0)return MSD_RESPONSE_FAILURE;  
 	else return MSD_RESPONSE_NO_ERROR;
@@ -124,11 +124,15 @@ u8 SD_SendCmd(u8 cmd, u32 arg, u8 crc)
 													   
 u8 SD_GetCID(u8 *cid_data)
 {
-    u8 r1;	   
-
-    r1=SD_SendCmd(CMD10,0,0x01);
+   	u8 retry=0xFF;
+    u8 r1;	 
+    do
+    {
+    	r1=SD_SendCmd(CMD10,0,0x01);
+    }while(r1 && retry--);
     if(r1==0x00)
 	{
+		/*CID is 16 Byte*/
 		r1=SD_RecvData(cid_data,16); 
     }
 	SD_DisSelect();
@@ -144,7 +148,7 @@ u8 SD_GetCSD(u8 *csd_data)
     {
     	r1=SD_SendCmd(CMD9,0,0x01);
     }while(r1 && retry--);
-    if(r1==0)
+    if(r1==0x00)
 	{
 		/*CSD is 16 Byte*/
     	r1=SD_RecvData(csd_data, 16);
@@ -154,9 +158,9 @@ u8 SD_GetCSD(u8 *csd_data)
 	else return 0;
 }  
 													  
-u32 SD_GetSectorCount(void)
+u32 SD_GetSectorCount(u8 *csd)
 {
-    u8 	csd[16];
+    //u8 	csd[16];
     u32 Capacity;  
     u8 	n;
 	u32 csize; 
@@ -166,7 +170,9 @@ u32 SD_GetSectorCount(void)
     /*check CSD version(2.0HC)*/    
     if((csd[0]&0xC0)==0x40)	 
     {	
+
   		csize = (u32)csd[9] + (((u32)csd[8])<<8) + (((u32)csd[7])<<16)+(((u32)(csd[6]&0x0F))<<24)+1;
+		/*bl_len = 512 Bytes,mult = 1024*/
 		Capacity= csize << 10 ;  
 		 		   
     }else/*check CSD version(1.0)*/  

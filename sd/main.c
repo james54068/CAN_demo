@@ -28,6 +28,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <math.h>
 #include "main.h"
 #include "drawing.h"
 #include "init_mcu.h"
@@ -138,31 +139,43 @@ static inline void Delay_1us(uint32_t nCnt_1us)
 
 int main(void)
 {
+  u8  csd[16];
+  u8  cid[16];
+ 
   GPIO_Configuration();
   USART1_Configuration();
  
   CANx_Config();
   CANx_NVIC_Config();
 
-  
-  float sd_size;
   while(SD_Initialize())
   {
     printf("Please insert SD card!\r\n");
     Delay_1us(1000000);
   }
-
   printf("SD card ready!\r\n");
-  
-  sd_size = (SD_GetSectorCount()*512.0f)/1024.0f/1024.0f/1024.0f;;
-   
-  printf("SD card size %f GB\r\n",sd_size);
  
+  float sd_size;
+  sd_size = (SD_GetSectorCount(csd)*512.0f)/1024.0f/1024.0f/1024.0f;;
+  printf("SD card size %f GB\r\n",sd_size);
 
+  if(SD_GetCID(cid)!=0X01)
+  {
+    printf("Manufacturer ID     %d\r\n",cid[0]);
+    printf("OEM/Application ID  %c%c\r\n",cid[1],cid[2]);
+    printf("Product name        %c%c%c%c%c\r\n",cid[3],cid[4],cid[5],cid[6],cid[7]);
+    printf("Manufacturing date  20%d/%d\r\n",((cid[15]&0xF0)>>4),(cid[15]&0x0F));
+  }
+  else printf("Wrong CID");
+ 
+ 
   while (1)
   {
     CANx_Transmit();
     GPIO_ToggleBits(LED4);
+
+
+
 
   }
   

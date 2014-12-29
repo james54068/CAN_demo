@@ -1,8 +1,14 @@
 #ifndef _SD_CARD_H_
 #define _SD_CARD_H_		 
 #include "stm32f4xx.h"
+/*
+Unit concept(differ from fatfs)
+Basic read/write :Block(512 Byte for SDHC)
+Basic erase :->erase_blk_on->Block
+			 ->erase_blk_off->Sector(64 KByte for SDHC)
+*/
  						    	 
-
+/*SD card type*/
 #define SD_TYPE_ERR     0X00
 #define SD_TYPE_MMC     0X01
 #define SD_TYPE_V1      0X02
@@ -131,11 +137,13 @@ CMD41   R1  Activates the card’s initialization process.
 #define CMD58   58     
 #define CMD59   59      
 
+/*Data Response Tokens meaning*/
 #define MSD_DATA_OK                0x05
 #define MSD_DATA_CRC_ERROR         0x0B
 #define MSD_DATA_WRITE_ERROR       0x0D
 #define MSD_DATA_OTHER_ERROR       0xFF
 
+/*R1 response meaning*/
 #define MSD_RESPONSE_NO_ERROR      0x00
 #define MSD_IN_IDLE_STATE          0x01
 #define MSD_ERASE_RESET            0x02
@@ -146,7 +154,7 @@ CMD41   R1  Activates the card’s initialization process.
 #define MSD_PARAMETER_ERROR        0x40
 #define MSD_RESPONSE_FAILURE       0xFF
  							   						 	 
-
+/*CS pin definition*/
 #define SD_CS_PORT GPIOA
 #define SD_CS_CLK  RCC_AHB1Periph_GPIOA
 #define SD_CS_PIN  GPIO_Pin_4
@@ -161,7 +169,7 @@ u8 SD_GetResponse(u8 Response);
 u8 SD_Initialize(void);							
 u8 SD_ReadDisk(u8*buf,u32 sector,u8 cnt);		
 u8 SD_WriteDisk(u8*buf,u32 sector,u8 cnt);		
-u32 SD_GetSectorCount(void);   					
+u32 SD_GetSectorCount(u8 *csd);  					
 u8 SD_GetCID(u8 *cid_data);                    
 u8 SD_GetCSD(u8 *csd_data);                    
  
