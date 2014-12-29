@@ -77,7 +77,7 @@ __________________________________________________________
 Multiple Block Write
 
 Start block:
-1|1|1|1|1|1|1|0
+1|1|1|1|1|1|0|0
 if stop transmission is requested
 1|1|1|1|1|1|0|1
 ________________________________________________________
@@ -164,6 +164,8 @@ CMD41   R1  Activates the card’s initialization process.
 
 extern u8  SD_Type;
 
+void SD_DisSelect(void);
+u8 SD_Select(void);
 u8 SD_WaitReady(void);							
 u8 SD_GetResponse(u8 Response);					
 u8 SD_Initialize(void);							
