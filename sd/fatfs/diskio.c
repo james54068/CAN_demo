@@ -131,7 +131,7 @@ DRESULT disk_ioctl (
 		        res = RES_OK;
 		        break;	 
 		    case GET_SECTOR_COUNT:
-		        *(DWORD*)buff = SD_GetSectorCount();
+		        *(DWORD*)buff = SD_GetSectorCount(buff);
 		        res = RES_OK;
 		        break;
 		    default:

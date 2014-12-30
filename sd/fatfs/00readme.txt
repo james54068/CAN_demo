@@ -10,10 +10,7 @@ FILES
   integer.h  Alternative type definitions for integer variables.
   option     Optional external functions.
 
-  Low level disk I/O module is not included in this archive because the FatFs
-  module is only a generic file system layer and not depend on any specific
-  storage device. You have to provide a low level disk I/O module that written
-  to control your storage device.
+  Low level disk I/O module is not included in this archive because the FatFs module is only a generic file system layer and not depend on any specific storage device. You have to provide a low level disk I/O module that written to control your storage device.
 
 
 

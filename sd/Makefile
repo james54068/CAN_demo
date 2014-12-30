@@ -21,7 +21,9 @@ CFLAGS_INCLUDE=-I. \
 	-I$(CMSIS)/Device/ST/STM32F4xx/Include\
 	-I$(ST)/inc  \
 	-I$(STM32F429_LIB) \
-	-I$(COMMON)
+	-I$(COMMON) \
+	-I./fatfs \
+# CFLAGS_INCLUDE +=
 
 CFLAGS_DEFINE= \
         -D USE_STDPERIPH_DRIVER \
@@ -89,6 +91,8 @@ OBJS=	./system_stm32f4xx.o \
         ./init_mcu.o \
         ./spi.o \
         ./sd.o \
+        ./fatfs/ff.o \
+        ./fatfs/diskio.o \
         $(STARTUP) 
         
 #Make all

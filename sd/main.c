@@ -34,9 +34,10 @@
 #include "init_mcu.h"
 #include "can.h"
 #include "sd.h"
+#include "ff.h"
+#include "integer.h"
 
 
-float Buffer[6];
 
 /* Private macro -------------------------------------------------------------*/
 #define ABS(x)                     (x < 0) ? (-x) : x
@@ -136,6 +137,25 @@ static inline void Delay_1us(uint32_t nCnt_1us)
     for (nCnt = 13; nCnt != 0; nCnt--);
 }
 
+float Buffer[6];
+/* File system object structure (FATFS) */
+FATFS     fs;
+/* File object structure (FIL) */
+FIL       fsrc, fdst;
+/* Directory object structure (DIR) */
+DIR       dir;
+/* File status structure (FILINFO) */
+FILINFO   fileInfo;
+/* File function return code (FRESULT) */
+FRESULT   res;
+/* File read/write count*/
+UINT      br, bw;
+/*root*/
+const uint8_t filedir[]="0:/";
+/*Max file number in root is 50(no long name <= 8 byte)*/
+uint8_t root_filedir[50][8];
+uint8_t root_file_count;
+uint8_t Block_Buffer[512];
 
 int main(void)
 {
@@ -147,7 +167,7 @@ int main(void)
  
   CANx_Config();
   CANx_NVIC_Config();
-
+  /*SD card init*/
   while(SD_Initialize())
   {
     printf("Please insert SD card!\r\n");
@@ -167,7 +187,11 @@ int main(void)
     printf("Manufacturing date  20%d/%d\r\n",((cid[15]&0xF0)>>4),(cid[15]&0x0F));
   }
   else printf("Wrong CID");
- 
+  /*SD card ready*/
+  /*FATFS init*/
+  f_mount(0,&fs);
+  res = f_opendir(&dir,filedir);
+  printf("%d\r\n",res);
  
   while (1)
   {
