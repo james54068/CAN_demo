@@ -91,6 +91,7 @@ OBJS=	./system_stm32f4xx.o \
         ./init_mcu.o \
         ./spi.o \
         ./sd.o \
+        ./file_command.o \
         ./fatfs/ff.o \
         ./fatfs/diskio.o \
         $(STARTUP) 

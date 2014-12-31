@@ -36,6 +36,7 @@
 #include "sd.h"
 #include "ff.h"
 #include "integer.h"
+#include "file_command.h"
 
 
 
@@ -144,7 +145,7 @@ FATFS     fs;
 FIL       fsrc, fdst;
 /* Directory object structure (DIR) */
 DIR       dir;
-/* File status structure (FILINFO) */
+ /*File status structure (FILINFO) */
 FILINFO   fileInfo;
 /* File function return code (FRESULT) */
 FRESULT   res;
@@ -188,11 +189,28 @@ int main(void)
   }
   else printf("Wrong CID");
   /*SD card ready*/
+  uint8_t res;
   /*FATFS init*/
   f_mount(0,&fs);
-  res = f_opendir(&dir,filedir);
-  printf("%d\r\n",res);
- 
+  // printf("%d\r\n",f_opendir(&dir,filedir));
+  //   if(f_opendir(&dir,filedir)==FR_OK)
+  //   {
+  //     while(f_readdir(&dir,&fileInfo)==FR_OK)
+  //     {
+  //         if(!fileInfo.fname[0]) break;
+  //         /*AM_ARC:read/write able file*/      
+  //         if(fileInfo.fattrib==AM_ARC)  printf("%s\r\n",fileInfo.fname);
+  //         /*AM_DIR:Directory*/
+  //         if(fileInfo.fattrib==AM_DIR)  printf("%s\r\n",fileInfo.fname);
+  //     }
+  //     f_readdir(&dir,NULL);
+  //   }
+  //f_mount(0,NULL);
+  //f_mount(0,&fs);
+  ls(&filedir);
+  //scan_directory(&filedir);
+
+  
   while (1)
   {
     CANx_Transmit();

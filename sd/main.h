@@ -36,6 +36,7 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ioe.h"
 #include "stm32f429i_discovery_l3gd20.h"
+#include "ff.h"
 
 
 /* Private define ------------------------------------------------------------*/
@@ -49,6 +50,17 @@
 #define TOGGLE_DEBUG GPIOC, GPIO_Pin_9
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
+extern FATFS     fs;
+/* File object structure (FIL) */
+extern FIL       fsrc, fdst;
+/* Directory object structure (DIR) */
+extern DIR       dir;
+ /*File status structure (FILINFO) */
+extern FILINFO   fileInfo;
+/* File function return code (FRESULT) */
+extern FRESULT   res;
+/* File read/write count*/
+extern UINT      br, bw;
 /* Exported macro ------------------------------------------------------------*/ 
 /* Exported functions ------------------------------------------------------- */
 
