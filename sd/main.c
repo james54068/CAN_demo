@@ -152,7 +152,7 @@ FRESULT   res;
 /* File read/write count*/
 UINT      br, bw;
 /*root*/
-const uint8_t filedir[]="0:/";
+uint8_t filedir[]="0:/";
 /*Max file number in root is 50(no long name <= 8 byte)*/
 uint8_t root_filedir[50][8];
 uint8_t root_file_count;
@@ -207,8 +207,10 @@ int main(void)
   //   }
   //f_mount(0,NULL);
   //f_mount(0,&fs);
-  ls(&filedir);
-  //scan_directory(&filedir);
+  //ls(&filedir);
+  // printf("---------------------\r\n");
+  ls_all(&filedir);
+ 
 
   
   while (1)
