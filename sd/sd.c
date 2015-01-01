@@ -170,7 +170,7 @@ u32 SD_GetSectorCount(u8 *csd)
     	csize = (u16)csd[9] + ((u16)(csd[8]&0x0F) << 8) + 1;
 		bl_len = csd[5]&0x0F; 
 		mult = (csd[10]>>1)&0x07;
-		Capacity = (u32)csize << (bl_len+mult+2);
+		Capacity = (u32)csize << (mult+2);
     }
     return Capacity;
 }

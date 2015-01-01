@@ -52,15 +52,15 @@
 /* Exported constants --------------------------------------------------------*/
 extern FATFS     fs;
 /* File object structure (FIL) */
-extern FIL       fsrc, fdst;
+// extern FIL       fsrc, fdst;
 /* Directory object structure (DIR) */
-extern DIR       dir;
+// extern DIR       dir;
  /*File status structure (FILINFO) */
-extern FILINFO   fileInfo;
+// extern FILINFO   fileInfo;
 /* File function return code (FRESULT) */
-extern FRESULT   res;
+// extern FRESULT   res;
 /* File read/write count*/
-extern UINT      br, bw;
+// extern UINT      br, bw;
 /* Exported macro ------------------------------------------------------------*/ 
 /* Exported functions ------------------------------------------------------- */
 

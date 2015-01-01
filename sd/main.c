@@ -154,8 +154,6 @@ UINT      br, bw;
 /*root*/
 uint8_t filedir[]="0:/";
 /*Max file number in root is 50(no long name <= 8 byte)*/
-uint8_t root_filedir[50][8];
-uint8_t root_file_count;
 uint8_t Block_Buffer[512];
 
 int main(void)
@@ -192,27 +190,11 @@ int main(void)
   uint8_t res;
   /*FATFS init*/
   f_mount(0,&fs);
-  // printf("%d\r\n",f_opendir(&dir,filedir));
-  //   if(f_opendir(&dir,filedir)==FR_OK)
-  //   {
-  //     while(f_readdir(&dir,&fileInfo)==FR_OK)
-  //     {
-  //         if(!fileInfo.fname[0]) break;
-  //         /*AM_ARC:read/write able file*/      
-  //         if(fileInfo.fattrib==AM_ARC)  printf("%s\r\n",fileInfo.fname);
-  //         /*AM_DIR:Directory*/
-  //         if(fileInfo.fattrib==AM_DIR)  printf("%s\r\n",fileInfo.fname);
-  //     }
-  //     f_readdir(&dir,NULL);
-  //   }
-  //f_mount(0,NULL);
-  //f_mount(0,&fs);
   //ls(&filedir);
-  // printf("---------------------\r\n");
-  ls_all(&filedir);
- 
+  //ls_all(&filedir);      
+  //read_file(&filedir);
+  f_mount(0,NULL);
 
-  
   while (1)
   {
     CANx_Transmit();

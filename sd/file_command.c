@@ -5,6 +5,13 @@
 
 uint8_t ls(uint8_t *Directory)
 {
+	/* Directory object structure (DIR) */
+	DIR       dir;
+ 	/*File status structure (FILINFO) */
+	FILINFO   fileInfo;
+	/* File function return code (FRESULT) */
+	FRESULT   res;
+
   	if(f_opendir(&dir,Directory)==FR_OK)
   	{
     	while(f_readdir(&dir,&fileInfo)==FR_OK)
@@ -66,4 +73,46 @@ uint8_t ls_all(uint8_t *Directory)
     	return 0;
   	}
   return 1;
+}
+
+
+uint8_t read_file(uint8_t *Directory)
+{
+	/* File object structure (FIL) */
+	FIL       fsrc;
+	/* Directory object structure (DIR) */
+	DIR       dir;
+ 	/*File status structure (FILINFO) */
+	FILINFO   fileInfo;
+	/* File function return code (FRESULT) */
+	FRESULT   res;
+	/* File read/write count*/
+	UINT      br;
+
+	/*Max file number in root is 50(no long name <= 8 byte)*/
+	uint8_t Block_Buffer[512];
+
+	res = f_opendir(&dir,Directory);
+  	printf("%d\r\n",res);
+  	if(res==FR_OK)
+  	{ 
+    	res = f_open(&fsrc, "123", FA_READ);
+    	printf("%d\r\n",res);
+    if(!res)
+    {
+      printf("open news.txt : %d\r\n",res);
+      br=1;
+      printf("File Content:\r\n");
+      for (;;)
+      {
+        int a=0;
+        for(a=0; a<512; a++) Block_Buffer[a]=0;
+        res = f_read(&fsrc, Block_Buffer, sizeof(Block_Buffer), &br);
+        printf("%s\r\n",Block_Buffer);
+        /**/
+        if (res || br < sizeof(Block_Buffer)) break; 
+      }
+    }
+    f_close(&fsrc);     
+  }
 }
