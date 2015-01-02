@@ -96,7 +96,7 @@ uint8_t read_file(uint8_t *Directory)
   	printf("%d\r\n",res);
   	if(res==FR_OK)
   	{ 
-    	res = f_open(&fsrc, "123", FA_READ);
+    	res = f_open(&fsrc, "5566", FA_READ);
     	printf("%d\r\n",res);
     if(!res)
     {
@@ -115,4 +115,42 @@ uint8_t read_file(uint8_t *Directory)
     }
     f_close(&fsrc);     
   }
+}
+
+
+uint8_t write_file(void)
+{
+	uint8_t Block_Buffer[512] = "FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n ";                           
+
+	/* File object structure (FIL) */
+	FIL       fsrc;
+	/* File function return code (FRESULT) */
+	FRESULT   res;
+	/* File read/write count*/
+	UINT      bw;
+    res = f_open(&fsrc, "5566.txt", FA_WRITE | FA_OPEN_ALWAYS); 
+  	printf("%d\r\n",res);  
+  	res = f_lseek (&fsrc ,0);
+  // printf("%d\r\n",res); 
+  // res = f_write (&fsrc ,&Block_Buffer ,100, &bw);
+  // printf("%d\r\n",res);
+  	printf("%d\r\n",strlen(Block_Buffer));
+  	if (res == FR_OK)
+  	{
+    	printf("create file ok!\r\n");
+    	printf("start write!\r\n");
+    	do
+    	{
+      		res = f_write(&fsrc,Block_Buffer,sizeof(Block_Buffer),&bw);
+      		printf("%d\r\n",bw);
+      		if(res)
+      		{
+        		printf("write error : %d\r\n",res);
+        		break;
+      		}
+      		printf("write ok!\r\n");
+    	}
+    	while (bw < sizeof(Block_Buffer)); 
+  	}
+  f_close(&fsrc);
 }

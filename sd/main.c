@@ -154,7 +154,7 @@ UINT      br, bw;
 /*root*/
 uint8_t filedir[]="0:/";
 /*Max file number in root is 50(no long name <= 8 byte)*/
-uint8_t Block_Buffer[512];
+uint8_t Block_Buffer[512] = "FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n ";                           
 
 int main(void)
 {
@@ -190,9 +190,13 @@ int main(void)
   uint8_t res;
   /*FATFS init*/
   f_mount(0,&fs);
+  //f_mkdir("new");
   //ls(&filedir);
   //ls_all(&filedir);      
-  //read_file(&filedir);
+  //read_file(&filedir);              
+  write_file();
+
+ 
   f_mount(0,NULL);
 
   while (1)
