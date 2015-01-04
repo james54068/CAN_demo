@@ -13,7 +13,7 @@ uint8_t ls(uint8_t *Directory)
 	FRESULT   res;
 
   	if(f_opendir(&dir,Directory)==FR_OK)
-  	{
+  	{ 
     	while(f_readdir(&dir,&fileInfo)==FR_OK)
     	{
       		if(!fileInfo.fname[0]) break;
@@ -128,17 +128,19 @@ uint8_t write_file(void)
 	FRESULT   res;
 	/* File read/write count*/
 	UINT      bw;
-    res = f_open(&fsrc, "5566.txt", FA_WRITE | FA_OPEN_ALWAYS); 
+    res = f_open(&fsrc, "whyf.txt", FA_WRITE | FA_OPEN_ALWAYS); 
   	printf("%d\r\n",res);  
-  	res = f_lseek (&fsrc ,0);
-  // printf("%d\r\n",res); 
-  // res = f_write (&fsrc ,&Block_Buffer ,100, &bw);
-  // printf("%d\r\n",res);
-  	printf("%d\r\n",strlen(Block_Buffer));
+  	res = f_lseek (&fsrc ,fsrc.fsize);
+  	printf("%d\r\n",res); 
+  	res = f_write (&fsrc ,"\r\n",2,&bw);
+  	printf("%d\r\n",res);
+  	printf("words:%d\r\n",strlen(Block_Buffer));
   	if (res == FR_OK)
   	{
     	printf("create file ok!\r\n");
     	printf("start write!\r\n");
+    	res = fprintf(&fsrc,"123456789\r\n");
+    	printf("%d\r\n",res);
     	do
     	{
       		res = f_write(&fsrc,Block_Buffer,sizeof(Block_Buffer),&bw);
@@ -152,5 +154,7 @@ uint8_t write_file(void)
     	}
     	while (bw < sizeof(Block_Buffer)); 
   	}
-  f_close(&fsrc);
+  	// res = f_lseek (&fsrc ,fsrc.fsize);
+  	// printf("%d\r\n",res); 
+  	f_close(&fsrc);
 }

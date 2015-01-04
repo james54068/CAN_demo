@@ -190,23 +190,18 @@ int main(void)
   uint8_t res;
   /*FATFS init*/
   f_mount(0,&fs);
-  //f_mkdir("new");
+  // res = f_mkdir("12");
+  // printf("%d\r\n",res);
   //ls(&filedir);
   //ls_all(&filedir);      
-  //read_file(&filedir);              
+  //read_file(&filedir); 
   write_file();
-
- 
   f_mount(0,NULL);
-
   while (1)
   {
     CANx_Transmit();
     GPIO_ToggleBits(LED4);
-
-
-
-
+   
   }
   
 }

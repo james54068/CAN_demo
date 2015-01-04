@@ -16,7 +16,7 @@ void SD_SPI_SpeedHigh(void)
 void SD_DisSelect(void)
 {
 	Set_SD_CS;
-	//SPIx_ReadWriteByte(0xff);
+	SPIx_ReadWriteByte(0xff);
 }
 u8 SD_Select(void)
 {
@@ -71,7 +71,7 @@ u8 SD_SendBlock(u8*buf,u8 cmd)
 	/*send data token(first byte)*/
 	SPIx_ReadWriteByte(cmd);
 	/*single block or multiple blocks write*/
-	if(cmd!=0xFE||cmd!=0xFC)
+	if(cmd!=0xFD)
 	{
 		/*512 bytes*/
 		for(t=0;t<512;t++)SPIx_ReadWriteByte(buf[t]);
@@ -89,7 +89,7 @@ u8 SD_SendCmd(u8 cmd, u32 arg, u8 crc)
 { 
     u8 r1;	
 	u8 Retry=0; 
-	//SD_DisSelect();
+	// SD_DisSelect();
 	if(SD_Select())return 0XFF;
 	/*( cmd | 0x40 ) because of command format*/
     SPIx_ReadWriteByte(cmd | 0x40);
@@ -325,7 +325,7 @@ u8 SD_ReadDisk(u8*buf,u32 sector,u8 cnt)
 u8 SD_WriteDisk(u8*buf,u32 sector,u8 cnt)
 {
 	u8 r1;
-	u8 retry=0xFF;
+	u16 retry=0xFFFF;
 	/*read 1 block(a sector in fatfs) 512 Byte*/
 	if(SD_Type!=SD_TYPE_V2HC)sector *= 512;
 	/*write 1 block*/
