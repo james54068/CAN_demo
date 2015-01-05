@@ -175,7 +175,7 @@ int main(void)
   printf("SD card ready!\r\n");
  
   float sd_size;
-  sd_size = (SD_GetSectorCount(csd)*512.0f)/1024.0f/1024.0f/1024.0f;;
+  sd_size = (SD_GetSectorCount(csd)*512.0f)/1024.0f/1024.0f/1024.0f;
   printf("SD card size %f GB\r\n",sd_size);
 
   if(SD_GetCID(cid)!=0X01)
@@ -190,7 +190,7 @@ int main(void)
   uint8_t res;
   /*FATFS init*/
   f_mount(0,&fs);
-  // res = f_mkdir("12");
+  res = f_mkdir("new");
   // printf("%d\r\n",res);
   //ls(&filedir);
   //ls_all(&filedir);      

@@ -5,7 +5,7 @@ u8  SD_Type=0;
 
 void SD_SPI_SpeedLow(void)
 {
- 	SPIx_SetSpeed(SPI_BaudRatePrescaler_32);	
+ 	SPIx_SetSpeed(SPI_BaudRatePrescaler_256);	
 }
 void SD_SPI_SpeedHigh(void)
 {
@@ -71,7 +71,7 @@ u8 SD_SendBlock(u8*buf,u8 cmd)
 	/*send data token(first byte)*/
 	SPIx_ReadWriteByte(cmd);
 	/*single block or multiple blocks write*/
-	if(cmd!=0xFD)
+	if(cmd!=0xFE||cmd!=0xFC)
 	{
 		/*512 bytes*/
 		for(t=0;t<512;t++)SPIx_ReadWriteByte(buf[t]);
@@ -89,7 +89,7 @@ u8 SD_SendCmd(u8 cmd, u32 arg, u8 crc)
 { 
     u8 r1;	
 	u8 Retry=0; 
-	// SD_DisSelect();
+	SD_DisSelect();
 	if(SD_Select())return 0XFF;
 	/*( cmd | 0x40 ) because of command format*/
     SPIx_ReadWriteByte(cmd | 0x40);
@@ -205,7 +205,7 @@ u8 SD_Initialize(void)
 
 	SPIx_Init();	
  	SD_SPI_SpeedLow();		  
-	// for(i=0;i<10;i++)SPIx_ReadWriteByte(0XFF);
+	for(i=0;i<10;i++)SPIx_ReadWriteByte(0XFF);
 	retry=20;
 	do
 	{

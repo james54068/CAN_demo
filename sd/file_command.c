@@ -128,7 +128,9 @@ uint8_t write_file(void)
 	FRESULT   res;
 	/* File read/write count*/
 	UINT      bw;
-    res = f_open(&fsrc, "whyf.txt", FA_WRITE | FA_OPEN_ALWAYS); 
+	res = f_open(&fsrc, "/new/data.txt", FA_CREATE_ALWAYS); 
+  	printf("%d\r\n",res); 
+    res = f_open(&fsrc, "/new/data.txt", FA_WRITE); 
   	printf("%d\r\n",res);  
   	res = f_lseek (&fsrc ,fsrc.fsize);
   	printf("%d\r\n",res); 
@@ -139,7 +141,7 @@ uint8_t write_file(void)
   	{
     	printf("create file ok!\r\n");
     	printf("start write!\r\n");
-    	res = fprintf(&fsrc,"123456789\r\n");
+    	res = f_printf(&fsrc,"123456789\r\n");
     	printf("%d\r\n",res);
     	do
     	{
@@ -153,8 +155,6 @@ uint8_t write_file(void)
       		printf("write ok!\r\n");
     	}
     	while (bw < sizeof(Block_Buffer)); 
-  	}
-  	// res = f_lseek (&fsrc ,fsrc.fsize);
-  	// printf("%d\r\n",res); 
+  	} 
   	f_close(&fsrc);
 }

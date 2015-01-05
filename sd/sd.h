@@ -90,7 +90,7 @@ Data error Tokens
 /************************************************************
 SD CARD standard Commands(in SPI mode commands work without CRC except for CMD0,8 )
 CMD0   	R1 	Resets the SD Card
-CMD1 	R1 	Activates the card‚Äôs initialization process
+CMD1 	R1 	Activates the cardís initialization process
 CMD6    R1  Checks switchable function (mode 0) and switches card function (mode 1).
 CMD8    R7  Sends SD Memory Card interface condition that includes host supply voltage information and asks the accessed card whether card can operate in supplied voltage range.Reserved bits shall be set to '0'.
 CMD9 	R1 	Asks the selected card to send its card-specific data (CSD).
@@ -101,7 +101,7 @@ CMD16   R1 	Selects a block length (in bytes) for all following block commands (
 CMD17   R1  Reads a block of the size selected by the SET_BLOCKLEN command. 2 
 CMD18   R1  Continuously transfers data blocks from card to host until interrupted by a STOP_ TRANSMISSION command.
 CMD24	R1 	Writes a block of the size selected by the SET_BLOCKLEN command. 4
-CMD25   R1  Continuously writes blocks of data until a stop transmission token is sent (instead of ‚Äòstart block‚Äô)
+CMD25   R1  Continuously writes blocks of data until a stop transmission token is sent (instead of ëstart blockí)
 CMD27   R1  Programming of the programmable bits of the CSD.
 CMD28   R1b If the card has write protection features, this command sets the write protection bit of the addressed group. The properties of write protection are coded in the card specific data (WP_GRP_SIZE).
 CMD29 	R1b If the card has write protection features, this command clears the write protection bit of the addressed group.
@@ -112,12 +112,12 @@ CMD38   R1b Erases all previously selected write blocks.
 CMD55   R1  Notifies the card that the next command is an application specific command rather than a standard command.
 CMD56 	R1  Used either to transfer a Data Block to the card or to get a Data Block from the card for general purpose/application specific commands. The size of the Data Block is defined with SET_BLOCK_LEN command.
 CMD58   R3  Reads the OCR register of a card.
-CMD59   R1  Turns the CRC option on or off. A ‚Äò1‚Äô in the CRC option bit will turn the option on, a ‚Äò0‚Äô will turn it off.
+CMD59   R1  Turns the CRC option on or off. A ë1í in the CRC option bit will turn the option on, a ë0í will turn it off.
 *****************************************************************************************************/ 	   
 /******************************************************************************************************
 SD CARD SPI MODE only Command
-CMD23   R1  Set the number of write blocks to be pre-erased before writing (to be used for faster Multiple Block WR command). ‚Äú1‚Äù=default (one wr block)(2).
-CMD41   R1  Activates the card‚Äôs initialization process.
+CMD23   R1  Set the number of write blocks to be pre-erased before writing (to be used for faster Multiple Block WR command). ì1î=default (one wr block)(2).
+CMD41   R1  Activates the cardís initialization process.
 
 ******************************************************************************************************/
 #define CMD0    0       
