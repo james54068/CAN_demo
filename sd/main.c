@@ -195,12 +195,23 @@ int main(void)
   //ls(&filedir);
   //ls_all(&filedir);      
   //read_file(&filedir); 
-  write_file();
-  f_mount(0,NULL);
+  // write_file();
+  // f_mount(0,NULL);
+  res = f_open(&fsrc, "/new/data.txt", FA_CREATE_ALWAYS); 
+  printf("%d\r\n",res); 
+  res = f_open(&fsrc, "/new/data.txt", FA_WRITE ); 
+  printf("%d\r\n",res); 
+
+  uint16_t count = 0;
   while (1)
   {
     CANx_Transmit();
     GPIO_ToggleBits(LED4);
+    res = f_printf(&fsrc,"%d\r\n",count);
+    // printf("%d\r\n",res);
+    count ++ ;
+    f_sync(&fsrc);
+
    
   }
   
