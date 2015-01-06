@@ -154,9 +154,8 @@ DWORD      br, bw;
 /*root*/
 uint8_t filedir[]="0:/";
 /*Max file number in root is 50(no long name <= 8 byte)*/
-uint8_t Block_Buffer[100000]; 
-uint8_t buffer[1024]="FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n\
-FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n";                                                        
+uint8_t Block_Buffer[5000]; 
+uint8_t buffer[1024]="FatFs is a generic FAT file system module for small embedded systems.The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer.Therefore it is independent of hardware architecture.It can be incorporated into low cost microcontrollers,such as AVR, 8051, PIC, ARM, Z80, 68k ... without change.\r\n";                                                        
 int main(void)
 {
 
@@ -180,7 +179,7 @@ int main(void)
   // printf("%d\r\n",res);
 
   int x=0;
-  for(x=0;x<140;x++)
+  for(x=0;x<15;x++)
   {
     strcat(Block_Buffer,buffer);
   }
@@ -192,7 +191,7 @@ int main(void)
   res = f_open(&fsrc, "data.txt", FA_WRITE ); 
   printf("%d\r\n",res);
 
-  
+  uint8_t count = 0; 
   while (1)
   {
     // CANx_Transmit();
@@ -211,22 +210,14 @@ int main(void)
       }
       while (bw < strlen(Block_Buffer));
     } 
-      f_sync(&fsrc);
-      GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
-
-    // f_write(&fsrc,&buffer,strlen(buffer),&bw); 
-    // // printf("%d\r\n",res); 
-    // if (res == 0) GPIO_ToggleBits(LED4);
-    // else if (res != 0) GPIO_ResetBits(LED4);
-  
-    // count ++ ;
-    // if(count>=100000)
-    // {
-    //   res = f_sync(&fsrc);    
-    //   count = 0;    
-    // }
-  
-    // GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
+    
+    count ++ ;
+    if(count>=20)
+    {
+      f_sync(&fsrc);    
+      count = 0; 
+      GPIO_ToggleBits(GPIOA,GPIO_Pin_2);   
+    }
 
   }
   
