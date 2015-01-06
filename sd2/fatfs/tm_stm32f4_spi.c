@@ -109,10 +109,10 @@ void TM_SPI_ReadMulti16(SPI_TypeDef* SPIx, uint16_t* dataIn, uint16_t dummy, uin
 		dataIn[i] = TM_SPI_Send16(SPIx, dummy);
 	}
 }
-
+SPI_InitTypeDef SPI_InitStruct;
 void TM_SPI1_Init(TM_SPI_PinsPack_t pinspack) {
 	GPIO_InitTypeDef GPIO_InitStruct;
-	SPI_InitTypeDef SPI_InitStruct;
+	
 
 	//Common settings for all pins
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -167,6 +167,7 @@ void TM_SPI1_Init(TM_SPI_PinsPack_t pinspack) {
 	SPI_Init(SPI1, &SPI_InitStruct);
 	SPI_Cmd(SPI1, ENABLE);
 }
+
 
 void TM_SPI2_Init(TM_SPI_PinsPack_t pinspack) {
 	GPIO_InitTypeDef GPIO_InitStruct;

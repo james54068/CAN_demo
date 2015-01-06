@@ -1,4 +1,4 @@
-/**
+ /**
   ******************************************************************************
   * @file    Touch_Panel/main.c
   * @author  MCD Application Team
@@ -197,22 +197,48 @@ int main(void)
   //read_file(&filedir); 
   // write_file();
   // f_mount(0,NULL);
-  res = f_open(&fsrc, "/new/data.txt", FA_CREATE_ALWAYS); 
-  printf("%d\r\n",res); 
-  res = f_open(&fsrc, "/new/data.txt", FA_WRITE ); 
-  printf("%d\r\n",res); 
+  uint8_t retry;
+
+  retry = 0xFF;
+  do
+  {
+    res = f_open(&fsrc, "/new/data.txt", FA_CREATE_ALWAYS); 
+    printf("%d\r\n",res); 
+  }while(res&&retry--);
+ 
+  retry = 0xFF;
+  do
+  {
+    res = f_open(&fsrc, "/new/data.txt", FA_WRITE ); 
+    printf("%d\r\n",res); 
+  }while(res&&retry--);
 
   uint16_t count = 0;
   while (1)
   {
-    CANx_Transmit();
-    GPIO_ToggleBits(LED4);
-    res = f_printf(&fsrc,"%d\r\n",count);
-    // printf("%d\r\n",res);
-    count ++ ;
-    f_sync(&fsrc);
+    // CANx_Transmit();
 
-   
+    // retry = 0xFF;
+    // do
+    // {
+    res = f_printf(&fsrc,"12345 %d\r\n",count);  
+    // }while(res&&retry--);
+
+    // printf("%d\r\n",res);
+    if (res != 255) GPIO_ToggleBits(LED4);
+    else if (res == 255) GPIO_ResetBits(LED4);
+
+    // count ++ ;
+    // if(count>=10)
+    // {
+    //   retry = 0xFF;
+ 
+      // res = f_sync(&fsrc);
+     
+    //   count = 0;     
+    // }
+    GPIO_ToggleBits(GPIOG,GPIO_Pin_2);
+     
   }
   
 }

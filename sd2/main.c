@@ -150,21 +150,24 @@ FILINFO   fileInfo;
 /* File function return code (FRESULT) */
 FRESULT   res;
 /* File read/write count*/
-UINT      br, bw;
+DWORD      br, bw;
 /*root*/
 uint8_t filedir[]="0:/";
 /*Max file number in root is 50(no long name <= 8 byte)*/
-uint8_t Block_Buffer[512] = "FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n ";                           
-
+uint8_t Block_Buffer[100000]; 
+uint8_t buffer[1024]="FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n\
+FatFs is a generic FAT file system module for small embedded systems. The FatFs is written in compliance with ANSI C and completely separated from the disk I/O layer. Therefore it is independent of hardware architecture. It can be incorporated into low cost microcontrollers, such as AVR, 8051, PIC, ARM, Z80, 68k and etc..., without any change. \r\n";                                                        
 int main(void)
 {
 
   GPIO_Configuration();
   USART1_Configuration();
+  Timer4_Initialization();
  
-  CANx_Config();
-  CANx_NVIC_Config();
 
+  // CANx_Config();
+  // CANx_NVIC_Config();
+ 
   uint8_t res = 0 ;
   /*FATFS init*/
   res = f_mount(&fs,1,1);
@@ -176,35 +179,86 @@ int main(void)
   // res = f_mount(NULL,1,1);
   // printf("%d\r\n",res);
 
+  int x=0;
+  for(x=0;x<140;x++)
+  {
+    strcat(Block_Buffer,buffer);
+  }
+  printf("%d\r\n",strlen(Block_Buffer)); 
+
   res = f_open(&fsrc, "data.txt", FA_CREATE_ALWAYS); 
   printf("%d\r\n",res); 
 
   res = f_open(&fsrc, "data.txt", FA_WRITE ); 
-  printf("%d\r\n",res); 
+  printf("%d\r\n",res);
+
   
-  uint32_t count = 0;
   while (1)
   {
     // CANx_Transmit();
-    // GPIO_ToggleBits(LED4);
-
-    res = f_printf(&fsrc,"12345678\r\n"); 
-    // printf("%d\r\n",res); 
-    if (res != 255) GPIO_ToggleBits(LED4);
-    else if (res == 255) GPIO_ResetBits(LED4);
-  
-    count ++ ;
-    if(count>=10000)
+    GPIO_ToggleBits(LED4);
+    f_lseek (&fsrc ,fsrc.fsize);
+    if (res == FR_OK)
     {
-      res = f_sync(&fsrc);    
-      count = 0;    
-    }
+      do
+      {
+          res = f_write(&fsrc,Block_Buffer,strlen(Block_Buffer),&bw);
+          if(res)
+          {
+            GPIO_ToggleBits(LED3);
+            break;
+          }
+      }
+      while (bw < strlen(Block_Buffer));
+    } 
+      f_sync(&fsrc);
+      GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
+
+    // f_write(&fsrc,&buffer,strlen(buffer),&bw); 
+    // // printf("%d\r\n",res); 
+    // if (res == 0) GPIO_ToggleBits(LED4);
+    // else if (res != 0) GPIO_ResetBits(LED4);
   
-    GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
+    // count ++ ;
+    // if(count>=100000)
+    // {
+    //   res = f_sync(&fsrc);    
+    //   count = 0;    
+    // }
+  
+    // GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
 
   }
   
 }
+
+void TIM4_IRQHandler(void)
+{
+  if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET)
+  {
+    // GPIO_ToggleBits(LED3);
+    // f_lseek (&fsrc ,fsrc.fsize);
+    // f_write (&fsrc ,"\r\n",2,&bw);
+    // if (res == FR_OK)
+    // {
+    //   do
+    //   {
+    //       res = f_write(&fsrc,Block_Buffer,sizeof(Block_Buffer),&bw);
+    //       if(res)
+    //       {
+    //         printf("write error : %d\r\n",res);
+    //         break;
+    //       }
+    //   }
+    //   while (bw < sizeof(Block_Buffer)); 
+    // } 
+    // f_sync(&fsrc); 
+    // GPIO_ToggleBits(GPIOA,GPIO_Pin_2);
+
+    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+  } 
+}
+
 
 /**
 * @brief  Configure the IO Expander and the Touch Panel.

@@ -4,6 +4,8 @@
 
 #include "diskio.h"
 #include "fatfs_sd.h"
+#include "stm32f4xx_spi.h"
+#include "stm32f4xx.h"
 
 /* MMC/SD command */
 #define CMD0	(0)			/* GO_IDLE_STATE */
@@ -33,12 +35,12 @@ static BYTE TM_FATFS_SD_CardType;			/* Card type flags */
 
 /* Initialize MMC interface */
 static void init_spi (void) {
-	TM_DELAY_Init();
+	// TM_DELAY_Init();
 	
 	TM_SPI_Init(FATFS_SPI, FATFS_SPI_PINSPACK);
 	FATFS_CS_HIGH;
 	
-	Delayms(10);
+	// Delayms(10);
 }
 
 
@@ -369,7 +371,8 @@ DSTATUS TM_FATFS_SD_disk_initialize (void) {
 	} else {
 		TM_FATFS_SD_Stat &= ~STA_PROTECT;
 	}
-	
+
+
 	return TM_FATFS_SD_Stat;
 }
 
